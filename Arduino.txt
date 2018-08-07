@@ -1,0 +1,1102 @@
+﻿#include <Arduino.h>
+
+#include <SoftwareSerial.h>
+
+// shift register pins
+int dataPin = 2;
+int latchPin = 3;
+int clockPin = 4;
+
+// bluetooth module pins
+int bluetoothTx = 8;
+int bluetoothRx = 9;
+SoftwareSerial BTrial(bluetoothTx, bluetoothRx);
+
+// currMode true - receive mode, false - send mode
+boolean currMode = true;
+boolean saveMode = 9;
+char recvBuff[100];
+int  cnt = 0;
+byte data1;
+byte data2;
+byte data3;
+byte data4;
+byte data5;
+byte data6;
+char fr1,fr2,fr3,fr4,fr5,fr6;
+
+
+
+void setup() {
+  Serial.begin(9600);
+
+  BTrial.begin(9600);
+
+  pinMode(dataPin, OUTPUT);
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+}
+
+// 받아온 아스키코드를 전기적 신호로 변경하여 전송
+void trans(char fr, int num) {
+
+// 받아온 아스키코드 확인하여 알맞은 점자 모양 전기적 신호를 저장 
+if(num==0)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data1 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data1 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data1 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data1 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data1 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data1 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data1 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data1 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data1 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data1 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data1 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data1 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data1 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data1 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data1 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data1 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data1 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data1 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data1 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data1 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data1 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data1 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data1 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data1 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data1 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data1 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data1 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data1 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data1 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data1 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data1 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data1 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data1 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data1 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data1 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data1 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data1 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data1 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data1 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data1 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data1 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data1 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data1 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data1 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data1 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data1 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data1 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data1 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data1 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data1 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data1 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data1 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data1 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data1 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data1 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data1 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data1 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data1 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data1 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data1 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data1 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data1 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data1 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data1 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data1 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data1 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data1 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data1 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data1 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data1 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data1 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data1 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data1 = 0b01001110;
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data1 = 0b00000010;
+      Serial.println(data1);
+       
+   shiftOut(dataPin, clockPin, LSBFIRST, data1);
+}
+
+else if(num==1)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data2 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data2 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data2 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data2 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data2 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data2 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data2 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data2 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data2 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data2 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data2 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data2 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data2 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data2 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data2 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data2 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data2 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data2 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data2 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data2 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data2 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data2 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data2 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data2 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data2 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data2 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data2 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data2 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data2 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data2 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data2 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data2 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data2 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data2 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data2 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data2 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data2 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data2 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data2 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data2 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data2 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data2 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data2 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data2 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data2 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data2 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data2 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data2 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data2 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data2 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data2 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data2 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data2 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data2 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data2 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data2 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data2 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data2 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data2 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data2 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data2 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data2 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data2 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data2 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data2 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data2 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data2 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data2 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data2 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data2 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data2 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data2 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data2 = 0b01001110;
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data2 = 0b00000010;
+      Serial.println(data2);
+      
+   shiftOut(dataPin, clockPin, LSBFIRST, data2);
+}
+
+else if(num==2)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data3 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data3 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data3 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data3 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data3 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data3 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data3 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data3 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data3 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data3 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data3 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data3 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data3 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data3 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data3 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data3 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data3 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data3 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data3 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data3 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data3 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data3 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data3 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data3 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data3 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data3 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data3 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data3 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data3 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data3 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data3 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data3 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data3 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data3 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data3 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data3 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data3 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data3 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data3 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data3 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data3 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data3 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data3 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data3 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data3 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data3 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data3 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data3 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data3 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data3 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data3 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data3 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data3 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data3 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data3 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data3 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data3 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data3 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data3 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data3 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data3 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data3 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data3 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data3 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data3 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data3 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data3 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data3 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data3 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data3 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data3 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data3 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data3 = 0b01001110;
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data3 = 0b00000010;
+      Serial.println(data3);
+   shiftOut(dataPin, clockPin, LSBFIRST, data3);
+}
+
+else if(num==3)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data4 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data4 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data4 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data4 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data4 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data4 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data4 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data4 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data4 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data4 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data4 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data4 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data4 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data4 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data4 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data4 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data4 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data4 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data4 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data4 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data4 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data4 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data4 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data4 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data4 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data4 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data4 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data4 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data4 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data4 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data4 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data4 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data4 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data4 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data4 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data4 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data4 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data4 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data4 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data4 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data4 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data4 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data4 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data4 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data4 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data4 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data4 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data4 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data4 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data4 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data4 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data4 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data4 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data4 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data4 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data4 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data4 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data4 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data4 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data4 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data4 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data4 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data4 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data4 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data4 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data4 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data4 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data4 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data4 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data4 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data4 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data4 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data4 = 0b01001110;
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data4 = 0b00000010;
+      Serial.println(data4);
+   shiftOut(dataPin, clockPin, LSBFIRST, data4);
+}
+
+else if(num==4)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data5 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data5 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data5 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data5 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data5 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data5 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data5 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data5 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data5 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data5 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data5 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data5 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data5 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data5 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data5 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data5 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data5 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data5 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data5 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data5 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data5 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data5 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data5 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data5 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data5 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data5 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data5 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data5 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data5 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data5 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data5 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data5 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data5 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data5 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data5 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data5 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data5 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data5 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data5 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data5 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data5 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data5 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data5 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data5 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data5 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data5 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data5 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data5 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data5 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data5 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data5 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data5 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data5 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data5 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data5 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data5 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data5 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data5 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data5 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data5 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data5 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data5 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data5 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data5 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data5 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data5 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data5 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data5 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data5 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data5 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data5 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data5 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data5 = 0b01001110;
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data5 = 0b00000010;
+      Serial.println(data5);
+   shiftOut(dataPin, clockPin, LSBFIRST, data5);
+}
+
+else if(num==5)
+{
+        if(fr == 'A')  // 'ㄱ'
+        data6 = 0b00100000;
+      else if(fr == 'B')  // 'ㄴ'
+        data6 = 0b01100000;
+      else if(fr == 'C')  // 'ㄷ'
+        data6 = 0b00110000;
+      else if(fr == 'D')  // 'ㄹ'
+        data6 = 0b00001000;
+      else if(fr == 'E')  // 'ㅁ'
+        data6 = 0b01001000;
+      else if(fr == 'F')  // 'ㅂ'
+        data6 = 0b00101000;
+      else if(fr == 'G')  // 'ㅅ'
+        data6 = 0b00000010;
+      else if(fr == 'H')  // 'ㅈ'
+        data6 = 0b00100010;
+      else if(fr == 'I')  // 'ㅊ'
+        data6 = 0b00001010;
+      else if(fr == 'J')  // 'ㅋ'
+        data6 = 0b01110000;
+      else if(fr == 'K')  // 'ㅌ'
+        data6 = 0b01011000;
+      else if(fr == 'L')  // 'ㅍ'
+        data6 = 0b01101000;
+      else if(fr == 'M')  // 'ㅎ'
+        data6 = 0b00111000;
+      else if(fr == 'N')  // '된소리'
+        data6 = 0b00000010;
+        
+      // 중성
+      else if(fr == 'O')  // 'ㅏ'
+        data6 = 0b01010010;
+      else if(fr == 'P')  // 'ㅑ'
+        data6 = 0b00101100;
+      else if(fr == 'Q')  // 'ㅓ'
+        data6 = 0b00110100;
+      else if(fr == 'R')  // 'ㅕ'
+        data6 = 0b01001010;
+      else if(fr == 'S')  // 'ㅗ'
+        data6 = 0b01000110;
+      else if(fr == 'T')  // 'ㅛ'
+        data6 = 0b00100110;
+      else if(fr == 'U')  // 'ㅜ'
+        data6 = 0b01100100;
+      else if(fr == 'V')  // 'ㅠ'
+        data6 = 0b01100010;
+      else if(fr == 'W')  // 'ㅡ'
+        data6 = 0b00110010;
+      else if(fr == 'X')  // 'ㅣ'
+        data6 = 0b01001100;
+      else if(fr == 'Y')  // 'ㅐ'
+        data6 = 0b01011100;
+      else if(fr == 'Z')  // 'ㅔ'
+        data6 = 0b01101100;
+      else if(fr == '[')  // 'ㅚ'
+        data6 = 0b01101110;
+      else if(fr == '\\')  // 'ㅘ'
+        data6 = 0b01010110;
+      else if(fr == ']')  // 'ㅝ'
+        data6 = 0b01110100;
+      else if(fr == '^')  // 'ㅢ'
+        data6 = 0b00111010;
+      else if(fr == '_')  // 'ㅖ'
+        data6 = 0b00100100;
+      else if(fr == '`')  // 'ㅣ*'
+        data6 = 0b01011100;
+        
+      // 종성
+      else if(fr == '!')  // 'ㄱ'
+        data6 = 0b01000000;
+      else if(fr == '"')  // 'ㄴ'
+        data6 = 0b00011000;
+      else if(fr == '#')  // 'ㄷ'
+        data6 = 0b00001100;
+      else if(fr == '$')  // 'ㄹ'
+        data6 = 0b00010000;
+      else if(fr == '%')  // 'ㅁ'
+        data6 = 0b00010010;
+      else if(fr == '&')  // 'ㅂ'
+        data6 = 0b01010000;
+      else if(fr == '\'')  // 'ㅅ'
+        data6 = 0b00000100;
+      else if(fr == '(')  // 'ㅇ'
+        data6 = 0b00011110;
+      else if(fr == ')')  // 'ㅈ'
+        data6 = 0b01000100;
+      else if(fr == '*')  // 'ㅊ'
+        data6 = 0b00010100;
+      else if(fr == '+')  // 'ㅋ'
+        data6 = 0b00011100;
+      else if(fr == ',')  // 'ㅌ'
+        data6 = 0b00010110;
+      else if(fr == '-')  // 'ㅍ'
+        data6 = 0b00011010;
+      else if(fr == '.')  // 'ㅎ'
+        data6 = 0b00001110;
+
+      // 공백
+      else if(fr == '/')
+        data6 = 0b00000000;
+     
+      // 영어
+      else if(fr == 'a')  // 'a'
+        data6 = 0b01000000;
+      else if(fr == 'b')  // 'b'
+        data6 = 0b01010000;
+      else if(fr == 'c')  // 'c'
+        data6 = 0b01100000;
+      else if(fr == 'd')  // 'd'
+        data6 = 0b01101000;
+      else if(fr == 'e')  // 'e'
+        data6 = 0b01001000;
+      else if(fr == 'f')  // 'f'
+        data6 = 0b01110000;
+      else if(fr == 'g')  // 'g'
+        data6 = 0b01111000;
+      else if(fr == 'h')  // 'h'
+        data6 = 0b01011000;
+      else if(fr == 'i')  // 'i'
+        data6 = 0b00110000;
+      else if(fr == 'j')  // 'j'
+        data6 = 0b00111000;
+      else if(fr == 'k')  // 'k'
+        data6 = 0b01000100;
+      else if(fr == 'l')  // 'l'
+        data6 = 0b01010100;
+      else if(fr == 'm')  // 'm'
+        data6 = 0b01100100;
+      else if(fr == 'n')  // 'n'
+        data6 = 0b01101100;
+      else if(fr == 'o')  // 'o'
+        data6 = 0b01001100;
+      else if(fr == 'p')  // 'p'
+        data6 = 0b01110100;
+      else if(fr == 'q')  // 'q'
+        data6 = 0b01111100;
+      else if(fr == 'r')  // 'r'
+        data6 = 0b01011100;
+      else if(fr == 's')  // 's'
+        data6 = 0b00110100;
+      else if(fr == 't')  // 't'
+        data6 = 0b00111100;
+      else if(fr == 'u')  // 'u'
+        data6 = 0b01000110;
+      else if(fr == 'v')  // 'v'
+        data6 = 0b01010110;
+      else if(fr == 'w')  // 'w'
+        data6 = 0b00111010;
+      else if(fr == 'x')  // 'x'
+        data6 = 0b01100110;
+      else if(fr == 'y')  // 'y'
+        data6 = 0b01101110;
+      else if(fr == 'z')  // 'z'
+        data6 = 0b01001110;
+        
+      
+      // 대문자
+      else if(fr == '~')  // 'ABCDE...'
+        data6 = 0b00000010;
+      Serial.println(6);
+   shiftOut(dataPin, clockPin, LSBFIRST, data6);
+}
+}
+
+void loop() {
+
+  char fromRead;
+  
+  digitalWrite(latchPin, LOW);
+
+cnt=0;
+
+// 블루투스로 통신하여 값 받아오기
+  if(BTrial.available()) {
+    // true - receive mode
+    currMode = true;
+    if(currMode != saveMode) {
+      saveMode = currMode;
+      Serial.print("\nRecv : ");
+      
+      // 메모리 초기화
+      memset(&recvBuff, 0x00, sizeof(recvBuff));
+    }
+
+     // 데이터 받기    
+      fromRead= (char)BTrial.read();
+      // 개행문자 처리
+      if(fromRead != 0x0a) {
+          if(cnt==0)
+          {
+              fr1 = fromRead;
+               trans(fr1,0);
+            cnt++;  }
+        else if(cnt==1)
+        {
+          fr2 = fromRead;
+          trans(fr2,1);
+          cnt++;
+        }
+        else if(cnt==2)
+        {
+          fr3 = fromRead;
+         trans(fr3,2);
+          cnt++;
+        }
+        else if(cnt==3)
+        {
+          fr4 = fromRead;
+          trans(fr4,3);
+          cnt++;
+        }
+        
+        else if(cnt==4)
+        {
+          fr5 = fromRead;
+          trans(fr5,4);
+          cnt++;
+        }
+        
+        else if(cnt==5)
+        {
+          fr6 = fromRead;
+          trans(fr6,5);
+          cnt++;
+         
+         cnt=0;
+        }
+       trans(fr1,fr2,fr3,fr4,fr5,fr6);
+        
+      }
+    
+    }
+    
+      digitalWrite(latchPin, HIGH);
+}
