@@ -1,4 +1,4 @@
-# Braille-translator (점자)
+# Braille-translator (점자번역기)
 Braille translator by using arduio and relay
 시각 장애인들의 정보 격차와 불편을 최소화하기 위한 점자 번역기 개발
 
