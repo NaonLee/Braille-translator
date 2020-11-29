@@ -91,7 +91,7 @@ public class UpAndDown extends BT_Preference implements OnClickListener, TextToS
         
 		// HOTLIST = new LinkedList<Integer>();
 				buflist = new LinkedList<Integer>();
-				// String a = "박주현";// 텍스트 받아온것
+				// String a = "";// 텍스트 받아온것
 
 				TextFile txt = new TextFile(book_text);// 객체생성
 				for (int i = 0; i < book_text.length(); i++) {
