@@ -46,4 +46,6 @@ Braille translator by using arduio and relay
  - 윤설아(팀원)
     : 점자 모듈 구현, 아두이노 소프트웨어, 블루투스 통신
     
-
+## 클래스 구조
+   
+![Class](https://user-images.githubusercontent.com/42129707/114408239-2d500600-9be4-11eb-8c67-ccee9590a847.png)
