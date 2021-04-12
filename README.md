@@ -48,4 +48,4 @@ Braille translator by using arduio and relay
     
 ## 클래스 구조
    
-<img src="(https://user-images.githubusercontent.com/42129707/114408239-2d500600-9be4-11eb-8c67-ccee9590a847.png" width="40%" height="40%" alt="classStructure"></img>
+<img src="https://user-images.githubusercontent.com/42129707/114408239-2d500600-9be4-11eb-8c67-ccee9590a847.png" width="40%" height="40%" alt="classStructure"></img>
